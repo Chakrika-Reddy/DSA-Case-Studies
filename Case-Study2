@@ -1,0 +1,79 @@
+class SegmentTree {
+    int[] tree;
+    int[] lazy;
+    int n;
+
+    SegmentTree(int[] arr) {
+        n = arr.length;
+        tree = new int[4 * n];
+        lazy = new int[4 * n];
+        build(arr, 1, 0, n - 1);
+    }
+
+    void build(int[] arr, int node, int lo, int hi) {
+        if (lo == hi) {
+            tree[node] = arr[lo];
+            return;
+        }
+        int mid = (lo + hi) / 2;
+        build(arr, node * 2, lo, mid);
+        build(arr, node * 2 + 1, mid + 1, hi);
+        tree[node] = Math.max(tree[node * 2], tree[node * 2 + 1]);
+    }
+
+    void pushDown(int node) {
+        if (lazy[node] != 0) {
+            int val = lazy[node];
+            tree[node * 2] += val;
+            tree[node * 2 + 1] += val;
+            lazy[node * 2] += val;
+            lazy[node * 2 + 1] += val;
+            lazy[node] = 0;
+        }
+    }
+
+    void updateRange(int node, int lo, int hi, int l, int r, int delta) {
+        if (r < lo || hi < l) {
+            return;
+        }
+
+        if (l <= lo && hi <= r) {
+            tree[node] += delta;
+            lazy[node] += delta;
+            return;
+        }
+
+        pushDown(node);
+
+        int mid = (lo + hi) / 2;
+        updateRange(node * 2, lo, mid, l, r, delta);
+        updateRange(node * 2 + 1, mid + 1, hi, l, r, delta);
+
+        tree[node] = Math.max(tree[node * 2], tree[node * 2 + 1]);
+    }
+
+    int queryMax(int node, int lo, int hi, int l, int r) {
+        if (r < lo || hi < l) {
+            return Integer.MIN_VALUE;
+        }
+
+        if (l <= lo && hi <= r) {
+            return tree[node];
+        }
+
+        pushDown(node);
+
+        int mid = (lo + hi) / 2;
+        int left = queryMax(node * 2, lo, mid, l, r);
+        int right = queryMax(node * 2 + 1, mid + 1, hi, l, r);
+        return Math.max(left, right);
+    }
+
+    void update(int l, int r, int delta) {
+        updateRange(1, 0, n - 1, l, r, delta);
+    }
+
+    int query(int l, int r) {
+        return queryMax(1, 0, n - 1, l, r);
+    }
+}
