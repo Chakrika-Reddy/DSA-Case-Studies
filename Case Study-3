@@ -1,0 +1,51 @@
+import java.util.*;
+
+public class BFSLimited {
+
+    static Set<String> bfsLimited(Map<String, List<String>> adj, String source, int maxDepth) {
+        Set<String> visited = new HashSet<>();
+        visited.add(source);
+
+        Deque<Object[]> queue = new ArrayDeque<>();
+        queue.offer(new Object[]{ source, 0 });
+
+        Set<String> reached = new HashSet<>();
+
+        while (!queue.isEmpty()) {
+            Object[] cur = queue.poll();
+            String u = (String) cur[0];
+            int depth = (int) cur[1];
+
+            if (!u.equals(source)) {
+                reached.add(u);
+            }
+
+            if (depth == maxDepth) {
+                continue;
+            }
+
+            for (String v : adj.getOrDefault(u, Collections.emptyList())) {
+                if (!visited.contains(v)) {
+                    visited.add(v);
+                    queue.offer(new Object[]{ v, depth + 1 });
+                }
+            }
+        }
+
+        return reached;
+    }
+
+    public static void main(String[] args) {
+        Map<String, List<String>> graph = new HashMap<>();
+        
+        graph.put("P", Arrays.asList("Q", "R"));
+        graph.put("Q", Arrays.asList("S", "T"));
+        graph.put("R", Arrays.asList("T", "U"));
+        graph.put("S", Arrays.asList("V"));
+        graph.put("T", Arrays.asList("V", "W"));
+        graph.put("U", Arrays.asList("W"));
+
+        Set<String> result = bfsLimited(graph, "P", 3);
+        System.out.println(result);
+    }
+}
